@@ -21,22 +21,57 @@ main:
 
     
     ; Implementati rezolvarea aici:
-    mov edx, [root]         ; Stocam adresa root-ului in reg general edx
-    push edx                ; Salvam pe stack adresa root-ului
-       
-    mov eax, dword [edx]     ; Field-ul cu char *data
-    mov ebx, dword [edx + 4] ; Field-ul cu Node *left
-    mov ecx, dword [edx + 8] ; Field-ul cu Node *right
-
-_rec_: 
-
     
+    
+    ;push edx                 ; Salvam pe stack adresa root-ului
+       
+    ;mov eax, dword [edx]     ; Field-ul cu char *data
+    ;mov ebx, dword [edx + 4] ; Field-ul cu Node *left
+    ;mov ecx, dword [edx + 8] ; Field-ul cu Node *right
+
+    mov ebx, [root]         ; Stocam adresa root-ului in reg general ebx
+    xor eax, eax            ; Aici vom stoca suma de pe left + right
+    
+_rec_:
+    
+    push ebx                ; Ebx pointeaza catre nodul root actual
+                            ; Ebx -> char* data
+                            ; ------ Node *left
+                            ; ------ Node *right
+    
+    mov ecx, [ebx + 4]      ; Node *left
+    mov edx, [ebx + 8]      ; Node *right
+    
+    test ecx, ecx           ; Verificam daca e frunza: ecx == 0x0
+    jz _leaf_
+    
+    call _l_adv_            
+    call _r_adv_            ; RETURN ADDRESS WHEN COMING BACK FROM LEFT RECURSIVE
+                            ; RETURN ADDRESS WHEN COMING BACK FROM RIGHT RECURSIVE
+    
+_l_adv_:
+    push ebp
+    mov ebp, esp
+    mov ebx, [ecx]          ; root = root->left
+    jmp _rec_
+    
+   
+   
+   
+   
+_leaf_:
+    mov eax, 
+    
+    
+    
+_pre_atoi_:                 ; Foloseste ebx, ecx, edx, edi si implicit eax
+                            ; Pregatire pentru executia procedurii atoi   
     xor ebx, ebx            ; Partea lower va stoca byte-ul citit
     xor ecx, ecx            ; Va stoca numarul rezultat pe 4 bytes
     xor edx, edx            ; Auxiliar pentru inmultirea cu 10
     xor edi, edi            ; Trigger pentru numar negativ
     
-_atoi_:                     
+_atoi_:                     ; Transforma din string in int
                             ; Functioneaza pt. signed/unsigned                           
     mov bl, byte [eax]      ; Mutam primul char din *data
     
@@ -55,13 +90,11 @@ _is_neg_:
     cmp edi, 0x1            ; Verifica daca trigger-ul e activ
     jnz _div_
                   
-
 _neg_:
     neg ecx                 ; Neaga intregul final stocat in ecx
     jmp _div_               ;~~~~~~~~~~~~~MODIFY
         
 _tran_:
-    
     sub bl, 48              ; Transformare din string in int
     mov edx, ecx            ; Pastram acelasi ecx pana la shiftare
                             ; Mul cu 10: (x << 3) + (x << 1)
@@ -76,7 +109,9 @@ _nx_chr_:
     inc eax                 ; Trecem la urmatorul char din string
     jmp _atoi_
 
-_op_:
+
+_op_:                       ; Stabilim ce tip de operatie se executa
+                            ; Intre left child si right child
                                                                                     
     cmp bl, 0x2d            ; Char '-', ASCII: 45
     jz _sub_                
@@ -92,9 +127,10 @@ _sub_:
 _add_:
 
 _mul_:
+    PRINT_STRING "its null"
 
-_div_:   
-PRINT_DEC 4, ecx
+_div_: 
+  
    
 
     
