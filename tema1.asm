@@ -47,16 +47,21 @@ _rec_:
 _l_adv_:
     mov ebx, [ecx]          ; root = root->left
     call _rec_
-    pop ebp
-    pop ebx
-    mov esi, eax            ; Mutam rezultatul din eax in esi
-    push esi                ; Save the result
+    pop ebp                 
+    pop ebx                 ; Scoatem de pe stiva leaf-ul
+    mov ebx, [ebp + 8]      ; Actualizam root-ul cu parintele leaf-ului
     
+    push eax                ; Rezultatul din atoi salvam pe stiva    
     ret
     
 _r_adv_:
     mov ebx, [edx]
     call _rec_
+    pop ebp
+    pop ebx
+    mov ebx, [ebp + 8]
+    
+    push eax
     ret
    
    
