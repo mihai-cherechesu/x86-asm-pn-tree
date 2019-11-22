@@ -45,6 +45,8 @@ _rec_:
     mov ecx, [ebx + 4]      ; Node *left update
     mov edx, [ebx + 8]      ; Node *right update
     
+    xor edi, edi            ; Resetarea valorii din subarborele drept
+    xor esi, esi            ; Resetarea valorii din subarborele stang
     pop edi                 ; Valoarea de pe subarborele drept
     pop esi                 ; Valoarea de pe subarborele stang
     mov eax, ebx            ; Punem adresa root-ului in eax pentru
@@ -156,18 +158,39 @@ _op_:                       ; Stabilim ce tip de operatie se executa
     jz _div_
 
 _sub_:   
-    
+    mov ebx, eax            ; Revenim cu adresa de root in ebx nealterat
+    sub esi, edi
+    jmp _ret_rec_
     
 _add_:
+    mov ebx, eax            ; Revenim cu adresa de root in ebx nealterat
+    add esi, edi
+    jmp _ret_rec_
 
 _mul_:
+    mov ebx, eax            ; Revenim cu adresa de root in ebx nealterat
+    mov eax, edi
+    imul esi
+    jmp _ret_rec_
     
 _div_: 
-  
+    mov ebx, eax            ; Revenim cu adresa de root in ebx nealterat
+    mov eax, esi
+    cdq
+    idiv edi
+    
+; Return in recursivitate cu expresia evaluata si pusa in eax
+_ret_rec_:                  
+    cmp ebx, [root]         ; Comparatie cu root: ultima operatie din arbore
+    jz exit
+    ret
    
 
+exit:    
+    pop ebp
+    pop ebx
+    PRINT_DEC 4, eax        ; Afisarea rezultatului
     
-    ; NU MODIFICATI
     ; Se elibereaza memoria alocata pentru arbore
     push dword [root]
     call freeAST
