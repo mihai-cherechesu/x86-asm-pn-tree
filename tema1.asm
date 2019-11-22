@@ -18,8 +18,9 @@ main:
     ; Se citeste arborele si se scrie la adresa indicata mai sus
     call getAST
     mov [root], eax
-
     
+
+            
     ; Implementati rezolvarea aici:
 
     mov ebx, [root]         ; Stocam adresa root-ului in reg general ebx
@@ -30,7 +31,13 @@ _rec_:
     push ebx                ; Salvam pe stiva root-ul
     push ebp
     mov ebp, esp
-    
+    PRINT_STRING "EBP"
+    PRINT_DEC 4, ebp
+    NEWLINE
+    PRINT_STRING "ESP"
+    PRINT_DEC 4, esp
+    NEWLINE
+        
     mov ecx, [ebx + 4]      ; Node *left
     mov edx, [ebx + 8]      ; Node *right
     
