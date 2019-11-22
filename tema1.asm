@@ -21,23 +21,15 @@ main:
 
     
     ; Implementati rezolvarea aici:
-    
-    
-    ;push edx                 ; Salvam pe stack adresa root-ului
-       
-    ;mov eax, dword [edx]     ; Field-ul cu char *data
-    ;mov ebx, dword [edx + 4] ; Field-ul cu Node *left
-    ;mov ecx, dword [edx + 8] ; Field-ul cu Node *right
 
     mov ebx, [root]         ; Stocam adresa root-ului in reg general ebx
-    xor eax, eax            ; Aici vom stoca suma de pe left + right
-    
+    xor eax, eax
+
 _rec_:
-    
-    push ebx                ; Ebx pointeaza catre nodul root actual
-                            ; Ebx -> char* data
-                            ; ------ Node *left
-                            ; ------ Node *right
+
+    push ebx                ; Salvam pe stiva root-ul
+    push ebp
+    mov ebp, esp
     
     mov ecx, [ebx + 4]      ; Node *left
     mov edx, [ebx + 8]      ; Node *right
@@ -45,27 +37,43 @@ _rec_:
     test ecx, ecx           ; Verificam daca e frunza: ecx == 0x0
     jz _leaf_
     
-    call _l_adv_            
-    call _r_adv_            ; RETURN ADDRESS WHEN COMING BACK FROM LEFT RECURSIVE
+    call _l_adv_ 
+    mov ecx, [ebx + 4]      ; Node *left update
+    mov edx, [ebx + 8]      ; Node *right update
+    
+    call _r_adv_            
                             ; RETURN ADDRESS WHEN COMING BACK FROM RIGHT RECURSIVE
     
 _l_adv_:
-    push ebp
-    mov ebp, esp
     mov ebx, [ecx]          ; root = root->left
-    jmp _rec_
+    call _rec_
+    pop ebp
+    pop ebx
+    mov esi, eax            ; Mutam rezultatul din eax in esi
+    push esi                ; Save the result
     
-   
-   
+    ret
+    
+_r_adv_:
+    mov ebx, [edx]
+    call _rec_
+    ret
    
    
 _leaf_:
-    mov eax, 
+    mov eax, ebx            ; Salvam in eax adresa de inceput a char*
+    call _pre_atoi_
+    ret                     ; Ne intoarcem la 
     
     
     
 _pre_atoi_:                 ; Foloseste ebx, ecx, edx, edi si implicit eax
-                            ; Pregatire pentru executia procedurii atoi   
+                            ; Pregatire pentru executia procedurii atoi
+                             
+    push ebx                ; Salvam valorile pe stiva din procedura anterioara
+    push ecx                ;
+    push edx                ;
+                                
     xor ebx, ebx            ; Partea lower va stoca byte-ul citit
     xor ecx, ecx            ; Va stoca numarul rezultat pe 4 bytes
     xor edx, edx            ; Auxiliar pentru inmultirea cu 10
@@ -92,8 +100,14 @@ _is_neg_:
                   
 _neg_:
     neg ecx                 ; Neaga intregul final stocat in ecx
-    jmp _div_               ;~~~~~~~~~~~~~MODIFY
-        
+    mov eax, ecx            ; Mutam valoarea de return in eax
+    
+    pop edx                 ; Scoatem de pe stiva vechile valori
+    pop ecx
+    pop ebx
+    ret                     ; Ne intoarcem unde pointeaza eip si cu
+                            ; valoarea transformata a nodului in eax
+            
 _tran_:
     sub bl, 48              ; Transformare din string in int
     mov edx, ecx            ; Pastram acelasi ecx pana la shiftare
