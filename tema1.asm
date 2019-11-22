@@ -42,7 +42,17 @@ _rec_:
     mov edx, [ebx + 8]      ; Node *right update
     
     call _r_adv_            
-                            ; RETURN ADDRESS WHEN COMING BACK FROM RIGHT RECURSIVE
+    mov ecx, [ebx + 4]      ; Node *left update
+    mov edx, [ebx + 8]      ; Node *right update
+    
+    pop edi                 ; Valoarea de pe subarborele drept
+    pop esi                 ; Valoarea de pe subarborele stang
+    mov eax, ebx            ; Punem adresa root-ului in eax pentru
+                            ; Determinarea operatiei dintre valori
+    jmp _op_
+    
+    
+    
     
 _l_adv_:
     mov ebx, [ecx]          ; root = root->left
@@ -68,7 +78,7 @@ _r_adv_:
 _leaf_:
     mov eax, ebx            ; Salvam in eax adresa de inceput a char*
     call _pre_atoi_
-    ret                     ; Ne intoarcem la 
+    ret                     ; Ne intoarcem din recursivitate cu int-ul
     
     
     
@@ -78,6 +88,7 @@ _pre_atoi_:                 ; Foloseste ebx, ecx, edx, edi si implicit eax
     push ebx                ; Salvam valorile pe stiva din procedura anterioara
     push ecx                ;
     push edx                ;
+    push edi
                                 
     xor ebx, ebx            ; Partea lower va stoca byte-ul citit
     xor ecx, ecx            ; Va stoca numarul rezultat pe 4 bytes
@@ -107,13 +118,15 @@ _neg_:
     neg ecx                 ; Neaga intregul final stocat in ecx
     mov eax, ecx            ; Mutam valoarea de return in eax
     
-    pop edx                 ; Scoatem de pe stiva vechile valori
+    pop edi                 ; Scoatem de pe stiva vechile valori
+    pop edx                 
     pop ecx
     pop ebx
     ret                     ; Ne intoarcem unde pointeaza eip si cu
                             ; valoarea transformata a nodului in eax
             
 _tran_:
+
     sub bl, 48              ; Transformare din string in int
     mov edx, ecx            ; Pastram acelasi ecx pana la shiftare
                             ; Mul cu 10: (x << 3) + (x << 1)
@@ -131,6 +144,7 @@ _nx_chr_:
 
 _op_:                       ; Stabilim ce tip de operatie se executa
                             ; Intre left child si right child
+    mov bl, byte [eax]
                                                                                     
     cmp bl, 0x2d            ; Char '-', ASCII: 45
     jz _sub_                
@@ -143,11 +157,11 @@ _op_:                       ; Stabilim ce tip de operatie se executa
 
 _sub_:   
     
+    
 _add_:
 
 _mul_:
-    PRINT_STRING "its null"
-
+    
 _div_: 
   
    
