@@ -31,8 +31,6 @@ main:
 _rec_: 
 
     
-    
-        
     xor ebx, ebx            ; Partea lower va stoca byte-ul citit
     xor ecx, ecx            ; Va stoca numarul rezultat pe 4 bytes
     xor edx, edx            ; Auxiliar pentru inmultirea cu 10
@@ -55,7 +53,8 @@ _mem_neg_:
     
 _is_neg_:                   
     cmp edi, 0x1            ; Verifica daca trigger-ul e activ
-    jz _neg_                
+    jnz _div_
+                  
 
 _neg_:
     neg ecx                 ; Neaga intregul final stocat in ecx
@@ -66,12 +65,12 @@ _tran_:
     sub bl, 48              ; Transformare din string in int
     mov edx, ecx            ; Pastram acelasi ecx pana la shiftare
                             ; Mul cu 10: (x << 3) + (x << 1)
-    shl ecx, 1              ;               :     :  x << 1
+    shl edx, 1              ;               :     :  x << 1
     shl ecx, 3              ;             x << 3  :    :
     add ecx, edx            ;               :     +    :
-    
+
     movzx ebx, bl           ; Extindem semnul pentru a opera
-    add ecx, bl             ; Adaugam cifra transformata la numar
+    add ecx, ebx            ; Adaugam cifra transformata la numar
     
 _nx_chr_:    
     inc eax                 ; Trecem la urmatorul char din string
@@ -95,12 +94,9 @@ _add_:
 _mul_:
 
 _div_:   
-
+PRINT_DEC 4, ecx
    
 
-    
-    
-    
     
     ; NU MODIFICATI
     ; Se elibereaza memoria alocata pentru arbore
