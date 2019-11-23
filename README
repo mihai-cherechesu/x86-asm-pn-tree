@@ -1,16 +1,78 @@
-============== Checker Tema 1 IOCLA ==============
+Nume: Cherechesu
+Prenume: Mihai-Cristian
+Grupa: 323 CB
 
-Checker-ul poate rula doar pe Linux.
-Pentru testare puteti copia fisierul binar tema1 in directorul checkerului sau puteti copia toate fisierele
-checkerului in directorul cu rezolvarea temei. Daca fisierul binar ./tema1 nu exista atunci checkerul va
-incerca sa ruleze comanda make.
-Fișierele input sunt în directorul inputs, iar valorile folosite ca referințe pentru verificarea rezultatelor
-sunt în directorul outputs.
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Prefix AST - Tema 1, IOCLA ####################################################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Rulare:
-	python checker.py
+Table of contents:
+- Idee generala
+- Structura temei
 
-Cerințe:
-	- gcc
-	- nasm
-	- python >= 3.0
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+###############################################################################
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Interesanta tema, congrats!
+
+Idee generala:
+	Am gandit toata tema intr-o maniera recursiva. Am structurat toate
+	procedurile si sub-procedurile destul de granular sa sa poata fi citit
+	usor. 
+	Nu cred ca am ales neaparat cea mai usoara metoda de implementare, insa
+	am vrut sa ma joc cu Stack-ul, EBP si cu CALL-urile din procedura in
+	procedura.
+	De la inceputul implementarii am decis sa salvez, cu cat merg in adancimea
+	arborelui cu DFS, toate root-urile pe stack si sa formez o logica cu 
+	stack frame-uri.
+	Am avut ceva probleme la revenirea din call-uri si la EIP-urile aferente
+	lor, in rest, logica din spate e destul de intuitiva. 
+
+
+Structura temei:
+	- Plecare din functia principala _rec_:
+			~ push root si avans cu ebp
+			~ stabilirea copiilor din structura packed cu offsets
+			  necesare (+4, +8)
+			~ stabilirea naturii copiiilor (leaf sau !leaf) si 
+			  luarea deciziilor in functie de acestea
+			~ call recursiv pe subarborele stang care substituie 
+			  in registrul de baza (ebx) root-ul (root->left)
+			~ si apel recursiv backwards in functia principala _rec_
+			
+
+	- Pasii acestia sunt iterati pana se ajunge in cazul de frunza cand se face
+	  un jump conditionat catre _leaf_:
+			~ urmatorul pas e transformarea content-ului din leaf
+			  din string in int cu ajutorul functiei _atoi_
+
+	- Functia _atoi_ are un mic preambul pentru initializari si salvare de date
+	  pe stack pentru siguranta programului (_pre_atoi_)
+			~ operatiile din ea sunt basic: se citeste byte cu byte din 
+			  nodul dat si se stabileste daca este negativ printr-un
+			  trigger (variabila precum OK = {0, 1}) edi.
+			~ se ajunge la int prin scaderea offset-ului ASCII 
+			~ se compune int-ul prin inmultiri repetate cu 10 si adunarea
+		          ultimei cifre.
+			~ inmultirea s-a facut prin 2 shiftari care (empiric au avut
+			  timp mai bun de executie)
+			~ se face returul inapoi in _b_atoi_ (back atoi)
+			~ aici se fac 2 pop-uri pentru a lua valorile de pe stiva 
+			  inapoi si pentru a lasa compilatorul sa ia eip-ul corect
+			  de pe stiva.
+
+	- Dupa o procesare analoaga pe subarborele drept (similar in C), se pun valorile
+	  in 2 registrii (am ales edi si esi pentru ca sunt sugestivi) - ei se culeg de pe 
+	  stiva, in urma procesarilor. (Stiva se reduce si se curata cu cat se executa
+	  operatiile, ramanand doar ebp1 initial si nodul cu operatia de baza, care vor 
+	  fi popped la final)
+
+	- In cele din urma, se face un jmp neconditionat la _op_
+			~ aici se stabileste tipul de operatie in functie de caracterul 
+			  gasit in nodul parinte al subarborilor
+			~ finally, se printeaza expresia obtinuta
+
+
+
+
+

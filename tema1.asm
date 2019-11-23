@@ -15,41 +15,40 @@ main:
     push ebp
     mov ebp, esp
     
-    ; Se citeste arborele si se scrie la adresa indicata mai sus
     call getAST
     mov [root], eax
-    
-
-            
-    ; Implementati rezolvarea aici:
 
     mov ebx, [root]         ; Stocam adresa root-ului in reg general ebx
     xor eax, eax
 
-_rec_:
+_rec_:                      ; Functie care da push la root pe stack,
+                            ; verifica natura nodurilor (leaf, !leaf) si
+                            ; initiaza call-urile recursive in subarborii
+                            ; stang, respectiv drept
 
     push ebx                ; Salvam pe stiva root-ul
-    push ebp
-    mov ebp, esp
+    push ebp                ; Salvam base-pointer pentru stack-frame-ul curent
+    mov ebp, esp            ; Trecem la next frame
    
         
     mov ecx, [ebx + 4]      ; Node *left    
     mov edx, [ebx + 8]      ; Node *right
 
     
-    test ecx, ecx           ; Verificam daca e frunza: ecx == 0x0
-    jz _leaf_
+    test ecx, ecx           ; Verificam daca e frunza: ecx e NULL
+    jz _leaf_               ; Jump daca ZF = 1
     
-    call _l_adv_ 
-    
-_b_l_adv_:
+    call _l_adv_            ; Avans in subarborele stang
+_b_l_adv_:                  ; eip de retur dupa call-ul _l_adv_
+
     push eax                ; Rezultatul din atoi salvam pe stiva
     mov ecx, [ebx + 4]      ; Node *left update
     mov edx, [ebx + 8]      ; Node *right update
-    call _r_adv_            
-_b_r_adv_:
+    
+    call _r_adv_            ; Avans in subarborele drept
+_b_r_adv_:                  ; eip de retur dupa call-ul _r_adv_
+
     push eax
-   
     mov ecx, [ebx + 4]      ; Node *left update
     mov edx, [ebx + 8]      ; Node *right update
     
@@ -61,31 +60,32 @@ _b_r_adv_:
                             ; Determinarea operatiei dintre valori
     jmp _op_
     
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-_l_adv_:
-    mov ebx, ecx          ; root = root->left
-    call _rec_
+    
+_l_adv_:                    
+    mov ebx, ecx            ; root = root->left
+    call _rec_              ; Call recursiv backwards
     
 _b_l_leaf_:
     mov ebx, [ebp + 4]      ; Actualizam root-ul cu parintele leaf-ului
-    ret
+    ret                     ; Retur la eip de pe stack: _b_l_adv_
     
 _r_adv_:
-    mov ebx, edx
-    call _rec_
+    mov ebx, edx            ; root = root->right
+    call _rec_              ; Call recursiv backwards
     
 _b_r_leaf_:
-    mov ebx, [ebp + 4]
-    ret
+    mov ebx, [ebp + 4]      ; Actualizam root-ul cu parintele leaf-ului
+    ret                     ; Retur la eip de pe stack: _b_r_adv_
    
    
 _leaf_:
     mov eax, [ebx]          ; Salvam in eax adresa de inceput a char*
-    call _pre_atoi_
+    call _pre_atoi_         ; Call functiei de transformare in int
     
-_b_atoi_:
-    pop ebp
-    pop ebx
+_b_atoi_:                   ; Eip pentru intoarcerea din _atoi_
+    pop ebp                 ; Scoatem de pe stiva stack-frame-ul
+    pop ebx                 ; pe care l-am terminat de calculat
+                            ; si pentru a ne putea intoarce la eip de pe stack
     
     ret                     ; Ne intoarcem din recursivitate cu int-ul
     
@@ -95,7 +95,7 @@ _pre_atoi_:                 ; Foloseste ebx, ecx, edx, edi si implicit eax
     push ebx                ; Salvam valorile pe stiva din procedura anterioara
     push ecx                ;
     push edx                ;
-    push edi
+    push edi                ;   
                           
     xor ebx, ebx            ; Partea lower va stoca byte-ul citit
     xor ecx, ecx            ; Va stoca numarul rezultat pe 4 bytes
@@ -154,13 +154,13 @@ _op_:                       ; Stabilim ce tip de operatie se executa
     mov ecx, [eax]
     mov bl, byte [ecx]   
                                                               
-    cmp bl, 45            ; Char '-', ASCII: 45
+    cmp bl, 45              ; Char '-', ASCII: 45
     jz _sub_                
-    cmp bl, 43            ; Char '+', ASCII: 43    
+    cmp bl, 43              ; Char '+', ASCII: 43    
     jz _add_
-    cmp bl, 42            ; Char '*', ASCII: 42
+    cmp bl, 42              ; Char '*', ASCII: 42
     jz _mul_
-    cmp bl, 47            ; Char '/', ASCII: 47
+    cmp bl, 47              ; Char '/', ASCII: 47
     jz _div_
 
 _sub_:
@@ -184,11 +184,11 @@ _mul_:
 _div_: 
     mov ebx, eax            ; Revenim cu adresa de root in ebx nealterat
     mov eax, esi
-    cdq
+    cdq                     ; Sign extend de la double la quad pentru idiv
     idiv edi
     
-; Return in recursivitate cu expresia evaluata si pusa in eax
-_ret_rec_:                  
+
+_ret_rec_:                  ; Return in recursivitate cu expresia evaluata si pusa in eax
     cmp ebx, [root]         ; Comparatie cu root: ultima operatie din arbore
     jz exit
     
@@ -197,12 +197,11 @@ _ret_rec_:
     ret
    
 
-exit:    
-    pop ebp
+exit:                       ; Exit-ul final din program
+    pop ebp                 
     pop ebx
-    PRINT_DEC 4, eax        ; Afisarea rezultatului
+    PRINT_DEC 4, eax        ; Afisarea rezultatului final
     
-    ; Se elibereaza memoria alocata pentru arbore
     push dword [root]
     call freeAST
     
