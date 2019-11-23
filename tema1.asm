@@ -35,21 +35,6 @@ _rec_:
         
     mov ecx, [ebx + 4]      ; Node *left    
     mov edx, [ebx + 8]      ; Node *right
-    
-    
-;;;;;;;;;;;;;;;;;;;;;;;;;
-PRINT_STRING "Root: "
-PRINT_DEC 4, ebx
-;;;;;;;;;;;;;;;;;;;;;;;;;
-    NEWLINE
-PRINT_STRING "Child LEFT: "
-PRINT_DEC 4, ecx
-;;;;;;;;;;;;;;;;;;;;;;;;;
-    NEWLINE
-PRINT_STRING "Child RIGHT: "
-PRINT_DEC 4, edx
-    NEWLINE
-;;;;;;;;;;;;;;;;;;;;;;;;;
 
     
     test ecx, ecx           ; Verificam daca e frunza: ecx == 0x0
@@ -61,10 +46,6 @@ _b_l_adv_:
     push eax                ; Rezultatul din atoi salvam pe stiva
     mov ecx, [ebx + 4]      ; Node *left update
     mov edx, [ebx + 8]      ; Node *right update
-    NEWLINE
-    PRINT_STRING "LEFT subtree result: "
-    PRINT_DEC 4, eax
-    NEWLINE
     call _r_adv_            
 _b_r_adv_:
     push eax
@@ -76,54 +57,29 @@ _b_r_adv_:
     xor esi, esi            ; Resetarea valorii din subarborele stang
     pop edi                 ; Valoarea de pe subarborele drept
     pop esi                 ; Valoarea de pe subarborele stang
-    NEWLINE
-    PRINT_STRING "VALORILE DIN SUBARBORI: "
-    NEWLINE
-    PRINT_DEC 4, esi
-    NEWLINE
-    PRINT_DEC 4, edi
     mov eax, ebx            ; Punem adresa root-ului in eax pentru
                             ; Determinarea operatiei dintre valori
     jmp _op_
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 _l_adv_:
-    NEWLINE
-    PRINT_STRING "LEFT advance"
-    NEWLINE
     mov ebx, ecx          ; root = root->left
     call _rec_
     
 _b_l_leaf_:
     mov ebx, [ebp + 4]      ; Actualizam root-ul cu parintele leaf-ului
-    NEWLINE
-    PRINT_STRING "IESIRE DIN RECURS CU ROOT LEF: "
-    PRINT_DEC 4, ebx
-    NEWLINE
     ret
     
 _r_adv_:
-    NEWLINE
-    PRINT_STRING "RIGHT advance"
-    NEWLINE
     mov ebx, edx
-    PRINT_STRING "RIGHT ROOT IN ADV: "
-    PRINT_DEC 4, ebx
-    NEWLINE
     call _rec_
     
 _b_r_leaf_:
     mov ebx, [ebp + 4]
-    NEWLINE
-    PRINT_STRING "IESIRE DIN RECURS CU ROOT RIG: "
-    PRINT_DEC 4, ebx
-    NEWLINE
     ret
    
    
 _leaf_:
-    PRINT_STRING "HERE A LEAF: "
-    NEWLINE
     mov eax, [ebx]          ; Salvam in eax adresa de inceput a char*
     call _pre_atoi_
     
@@ -149,10 +105,6 @@ _pre_atoi_:                 ; Foloseste ebx, ecx, edx, edi si implicit eax
 _atoi_:                     ; Transforma din string in int
                             ; Functioneaza pt. signed/unsigned                           
     mov bl, byte [eax]      ; Mutam primul char din *data
-    PRINT_STRING "CHAR-UL: "
-    PRINT_DEC 1, bl
-    NEWLINE
-    
     cmp bl, 0x2d            ; Verificam dac byte-ul e '-'
     jz _mem_neg_            ; Numarul e negativ
     
@@ -177,8 +129,6 @@ _not_neg_:
     pop edx                 
     pop ecx
     pop ebx
-    PRINT_STRING "CU ATOI OBTINEM: "
-    PRINT_DEC 4, eax
     ret                     ; Ne intoarcem unde pointeaza eip si cu
                             ; valoarea transformata a nodului in eax
             
@@ -203,10 +153,6 @@ _op_:                       ; Stabilim ce tip de operatie se executa
                             ; Intre left child si right child
     mov ecx, [eax]
     mov bl, byte [ecx]   
-    NEWLINE
-    PRINT_STRING "TIPUL DE OPERATIE: "
-    PRINT_DEC 1, bl
-    NEWLINE
                                                               
     cmp bl, 45            ; Char '-', ASCII: 45
     jz _sub_                
@@ -236,25 +182,15 @@ _mul_:
     jmp _ret_rec_
     
 _div_: 
-    PRINT_STRING "INTRAM IN DIV!"
-    NEWLINE 
     mov ebx, eax            ; Revenim cu adresa de root in ebx nealterat
-    PRINT_STRING "REVENIREA LA ROOT NEALTERAT: "
-    PRINT_DEC 4, ebx
-    NEWLINE
     mov eax, esi
     cdq
     idiv edi
-    
-    PRINT_STRING "REZULTATUL IMPARTIRII: "
-    PRINT_DEC 4, eax
-    NEWLINE
     
 ; Return in recursivitate cu expresia evaluata si pusa in eax
 _ret_rec_:                  
     cmp ebx, [root]         ; Comparatie cu root: ultima operatie din arbore
     jz exit
-    PRINT_STRING "NOT THE LAST OP"
     
     pop ebp
     pop ebx
@@ -264,8 +200,6 @@ _ret_rec_:
 exit:    
     pop ebp
     pop ebx
-    NEWLINE
-    PRINT_STRING "LAST RESULT: "
     PRINT_DEC 4, eax        ; Afisarea rezultatului
     
     ; Se elibereaza memoria alocata pentru arbore
