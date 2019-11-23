@@ -1,0 +1,20 @@
+NEWLINE
+PRINT_STRING ""
+PRINT_DEC 4, eax
+NEWLINE
+;;;;;;;;;;;;;;;;;;;;;;;;;
+NEWLINE
+PRINT_STRING ""
+PRINT_DEC 4, ebx
+NEWLINE
+;;;;;;;;;;;;;;;;;;;;;;;;;
+NEWLINE
+PRINT_STRING ""
+PRINT_DEC 4, ecx
+NEWLINE
+;;;;;;;;;;;;;;;;;;;;;;;;;
+NEWLINE
+PRINT_STRING ""
+PRINT_DEC 4, edx
+NEWLINE
+;;;;;;;;;;;;;;;;;;;;;;;;;
